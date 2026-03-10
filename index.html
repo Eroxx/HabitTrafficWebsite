@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Traffic: Know Where Every Habit Stands</title>
+  <meta name="description" content="Habit Traffic gives every routine a green, yellow, or red light, so you always know what needs your attention today.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+      --green:       #22C55E;
+      --green-light: #DCFCE7;
+      --green-mid:   rgba(34,197,94,0.24);
+      --green-glow:  rgba(34,197,94,0.35);
+
+      --yellow:      #F59E0B;
+      --yellow-light:#FEF3C7;
+      --yellow-mid:  rgba(245,158,11,0.24);
+      --yellow-glow: rgba(245,158,11,0.35);
+
+      --red:         #EF4444;
+      --red-light:   #FEE2E2;
+      --red-mid:     rgba(239,68,68,0.24);
+      --red-glow:    rgba(239,68,68,0.35);
+
+      /* Page surfaces */
+      --bg:          #F7F6F2;
+      --bg2:         #EFEDE8;
+      --surf:        #FFFFFF;
+      --border:      rgba(0,0,0,0.07);
+      --border-med:  rgba(0,0,0,0.11);
+
+      /* Text */
+      --text:        #111110;
+      --muted:       #6B6B6A;
+      --faint:       #A0A09E;
+
+      /* Dark accent for CTA */
+      --dark:        #111110;
+      --dark-surf:   #1A1A18;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Subtle grain overlay */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9000;
+      opacity: 0.035;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23g)'/%3E%3C/svg%3E");
+    }
+
+    /* ===== FONTS ===== */
+    .f-display { font-family: 'Bebas Neue', sans-serif; line-height: 0.92; letter-spacing: 0.01em; }
+    .f-head    { font-family: 'Syne', sans-serif; }
+
+    /* ===== TRAFFIC LIGHT CYCLING ===== */
+    @keyframes tl-pulse-g {
+      0%,30%  { opacity:1; box-shadow:0 0 16px var(--green),0 0 40px rgba(34,197,94,0.5),0 0 80px rgba(34,197,94,0.2); }
+      38%,100%{ opacity:0.13; box-shadow:inset 0 2px 6px rgba(0,0,0,0.35); }
+    }
+    @keyframes tl-pulse-y {
+      0%,30%  { opacity:1; box-shadow:0 0 16px var(--yellow),0 0 40px rgba(245,158,11,0.5),0 0 80px rgba(245,158,11,0.2); }
+      38%,100%{ opacity:0.13; box-shadow:inset 0 2px 6px rgba(0,0,0,0.35); }
+    }
+    @keyframes tl-pulse-r {
+      0%,30%  { opacity:1; box-shadow:0 0 16px var(--red),0 0 40px rgba(239,68,68,0.5),0 0 80px rgba(239,68,68,0.2); }
+      38%,100%{ opacity:0.13; box-shadow:inset 0 2px 6px rgba(0,0,0,0.35); }
+    }
+
+    /* Ambient glow on hero bg */
+    @keyframes amb-g { 0%,30%{opacity:1}38%,100%{opacity:0} }
+    @keyframes amb-y { 0%,30%{opacity:1}38%,100%{opacity:0} }
+    @keyframes amb-r { 0%,30%{opacity:1}38%,100%{opacity:0} }
+
+    .tl-bulb-g { animation: tl-pulse-g 6s ease-in-out infinite 0s; }
+    .tl-bulb-y { animation: tl-pulse-y 6s ease-in-out infinite 2s; }
+    .tl-bulb-r { animation: tl-pulse-r 6s ease-in-out infinite 4s; }
+    .amb-g     { animation: amb-g 6s ease-in-out infinite 0s; }
+    .amb-y     { animation: amb-y 6s ease-in-out infinite 2s; }
+    .amb-r     { animation: amb-r 6s ease-in-out infinite 4s; }
+
+    /* ===== NAV ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(20px, 6vw, 64px); height: 64px;
+      background: rgba(247,246,242,0.88);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-link    { font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .nav-link:hover { color: var(--text); }
+    .nav-discord { color: var(--faint); display: flex; align-items: center; transition: color 0.2s; }
+    .nav-discord:hover { color: #5865F2; }
+
+    /* ===== HERO ===== */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 100px clamp(20px, 8vw, 100px) 60px;
+      position: relative; overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* Subtle dot grid */
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none;
+      opacity: 0.4;
+      background-image: radial-gradient(circle, rgba(0,0,0,0.065) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 30%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    /* Radial color wash cycling */
+    .hero-amb { position:absolute;inset:0;pointer-events:none;transition:opacity 1s; }
+
+    /* ===== SECTIONS ===== */
+    .section { padding: 96px clamp(20px, 8vw, 100px); }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+
+    /* ===== PHONE ===== */
+    .phone {
+      border-radius: 44px;
+      background: #fff;
+      overflow: hidden;
+      position: relative;
+      padding: 28px 16px 14px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.06),
+        0 4px 16px rgba(0,0,0,0.07),
+        0 28px 60px rgba(0,0,0,0.14);
+    }
+    .phone::before {
+      content:''; position:absolute;inset:0;z-index:1;border-radius:inherit;
+      background:linear-gradient(160deg,rgba(255,255,255,0.14) 0%,transparent 35%);
+      pointer-events:none;
+    }
+    .phone img { width:100%;height:auto;display:block;vertical-align:middle; }
+    /* "Screen inside phone" look: thin dark bezel, screenshot is the rounded screen (no rectangle-in-frame) */
+    .phone.phone-screen {
+      padding: 8px;
+      background: #1c1c1e;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 4px 20px rgba(0,0,0,0.15), 0 20px 48px rgba(0,0,0,0.2);
+    }
+    .phone.phone-screen::before { display: none; }
+    .phone-status-crop {
+      overflow: hidden;
+      border-radius: 36px;
+      position: relative;
+    }
+    .phone-status-crop img {
+      width: 100%;
+      height: auto;
+      display: block;
+      vertical-align: middle;
+    }
+    /* Mask out OS status bar area on all screenshots */
+    .phone-status-crop::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 30px; /* tall enough to cover full iOS status bar in all shots */
+      background: #F6F6F8;
+      opacity: 1;
+      pointer-events: none;
+    }
+    /* Callout above first screenshot – points down to traffic light (not part of screenshot) */
+    .callout-slot {
+      height: 52px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .callout-above {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .callout-above-label {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--dark);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .callout-above-arrow {
+      display: block;
+      margin-top: 6px;
+      margin-left: 16px;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--dark);
+    }
+    a:hover .phone { transform:translateY(-6px) scale(1.02); }
+    a:focus-visible .phone { outline:3px solid var(--green);outline-offset:4px; }
+    /* Wrapper that gives rotated phones room to breathe */
+    .phone-wrap { overflow: visible; }
+    .screen-row  { overflow: visible !important; padding-top: 28px; }
+
+    /* Screenshot click: expand a bit in place, not full page */
+    .screenshot-wrap { position: relative; display: inline-block; }
+    .screenshot-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 1000; opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .screenshot-overlay.on { opacity: 1; pointer-events: auto; cursor: pointer; }
+    .screenshot-wrap.expanded .phone {
+      position: fixed; left: 50%; top: 50%;
+      transform: translate(-50%, -50%) scale(1.35);
+      z-index: 1001; cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .screenshot-wrap .phone { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+
+    /* ===== SIGNAL CARDS (light with color) ===== */
+    .scard {
+      background: var(--surf);
+      border-radius: 24px;
+      padding: 36px 24px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07);
+      border: 1px solid var(--border);
+    }
+    .scard:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07), 0 20px 56px rgba(0,0,0,0.11);
+    }
+    /* Colored wash backgrounds */
+    .scard.g { background: linear-gradient(160deg, #F0FDF4, var(--green-light)); border-color: rgba(34,197,94,0.22); }
+    .scard.y { background: linear-gradient(160deg, #FFFBEB, var(--yellow-light)); border-color: rgba(245,158,11,0.22); }
+    .scard.r { background: linear-gradient(160deg, #FFF5F5, var(--red-light));   border-color: rgba(239,68,68,0.22); }
+    /* Colored hover shadows */
+    .scard.g:hover { box-shadow: 0 4px 16px rgba(34,197,94,0.12), 0 20px 56px rgba(34,197,94,0.15); }
+    .scard.y:hover { box-shadow: 0 4px 16px rgba(245,158,11,0.12), 0 20px 56px rgba(245,158,11,0.15); }
+    .scard.r:hover { box-shadow: 0 4px 16px rgba(239,68,68,0.12), 0 20px 56px rgba(239,68,68,0.15); }
+    /* Top color bar */
+    .scard::before {
+      content:''; position:absolute;
+      top:0;left:0;right:0;height:4px;
+    }
+    .scard.g::before { background: var(--green); }
+    .scard.y::before { background: var(--yellow); }
+    .scard.r::before { background: var(--red); }
+
+    /* Soft glow at bottom */
+    .scard::after {
+      content:''; position:absolute;
+      bottom:-60px;left:50%;transform:translateX(-50%);
+      width:220px;height:220px;border-radius:50%;
+      filter:blur(55px);opacity:0.38;pointer-events:none;
+    }
+    .scard.g::after { background: var(--green); }
+    .scard.y::after { background: var(--yellow); }
+    .scard.r::after { background: var(--red); }
+
+    /* ===== FEATURE CARD ===== */
+    .feat {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 24px;
+      background: var(--surf);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05);
+      transition: box-shadow 0.25s, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .feat:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07), 0 12px 32px rgba(0,0,0,0.09);
+      transform: translateY(-4px);
+    }
+    .feat-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    /* ===== PILL LABEL ===== */
+    .label {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    /* ===== BUTTON ===== */
+    .btn {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 14px 30px; border-radius: 100px;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+      text-decoration: none; cursor: pointer; border: none;
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s;
+    }
+    .btn-dark { background: var(--dark); color: #fff; }
+    .btn-dark:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+    }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 28px var(--green-glow);
+    }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1.5px solid var(--border-med);
+    }
+    .btn-outline:hover {
+      background: var(--surf);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    /* ===== SCROLL REVEAL ===== */
+    .rv {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1);
+    }
+    .rv.in { opacity: 1; transform: none; }
+    .d1 { transition-delay: 0.06s; }
+    .d2 { transition-delay: 0.12s; }
+    .d3 { transition-delay: 0.18s; }
+    .d4 { transition-delay: 0.24s; }
+    .d5 { transition-delay: 0.30s; }
+    .d6 { transition-delay: 0.36s; }
+
+    /* ===== MISC ===== */
+    a { color: inherit; text-decoration: none; }
+    img { display: block; }
+    .hr { height: 1px; background: var(--border); border: none; }
+
+    /* ===== STAT BADGE ===== */
+    .stat-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--surf); border: 1px solid var(--border);
+      border-radius: 100px; padding: 8px 16px;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .phones-grid { grid-template-columns: 1fr !important; }
+      .phones-grid > *:not(:nth-child(2)) { display: none; }
+      .feat-grid   { grid-template-columns: 1fr 1fr !important; }
+      .lights-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (max-width: 520px) {
+      .feat-grid { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════ NAVBAR ════════════════════ -->
+<nav>
+  <a href="#" style="display:flex;align-items:center;gap:11px;">
+    <img src="brand_assets/Habbit AppIcon 1.png" alt="Habit Traffic"
+         style="width:32px;height:32px;border-radius:8px;flex-shrink:0;">
+    <span class="f-head" style="font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.01em;">Habit Traffic</span>
+  </a>
+  <div style="display:flex;align-items:center;gap:24px;">
+    <a href="https://discord.gg/" target="_blank" rel="noopener" class="nav-discord" title="Discord community">
+      <svg width="20" height="20" viewBox="0 0 127.14 96.36" fill="currentColor">
+        <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+      </svg>
+    </a>
+    <a href="mailto:habittrafficapp@gmail.com" class="nav-link">Contact</a>
+  </div>
+</nav>
+
+
+<!-- ════════════════════ HERO ════════════════════ -->
+<section id="hero">
+
+  <!-- Cycling ambient color washes -->
+  <div class="hero-amb amb-g" style="background:radial-gradient(ellipse 70% 55% at 50% 45%,rgba(34,197,94,0.09) 0%,transparent 70%);"></div>
+  <div class="hero-amb amb-y" style="background:radial-gradient(ellipse 70% 55% at 50% 45%,rgba(245,158,11,0.09) 0%,transparent 70%);"></div>
+  <div class="hero-amb amb-r" style="background:radial-gradient(ellipse 70% 55% at 50% 45%,rgba(239,68,68,0.09) 0%,transparent 70%);"></div>
+
+  <div style="position:relative;z-index:1;max-width:920px;width:100%;">
+
+    <div class="rv" style="display:flex;justify-content:center;margin-bottom:28px;">
+      <span class="stat-badge">
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 6px var(--green-glow);"></span>
+        Habit Tracking · iPhone & iPad
+      </span>
+    </div>
+
+    <!-- Main headline -->
+    <div class="rv d1">
+      <div class="f-display" style="font-size:clamp(60px,13vw,148px);color:var(--text);">YOUR HABITS.</div>
+    </div>
+
+    <!-- Second line with traffic light embedded -->
+    <div class="rv d2" style="display:flex;align-items:center;justify-content:center;gap:clamp(10px,2.5vw,28px);margin:4px 0 8px;">
+      <div class="f-display" style="font-size:clamp(60px,13vw,148px);color:var(--text);">CLEAR</div>
+
+      <!-- Traffic light widget -->
+      <div style="flex-shrink:0;">
+        <div style="
+          background: linear-gradient(160deg,#2C2C2A,#1A1A18);
+          border-radius: clamp(14px,2.2vw,22px);
+          padding: clamp(10px,1.4vw,16px) clamp(9px,1.2vw,14px);
+          border: 1px solid rgba(255,255,255,0.06);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);
+          display:flex;flex-direction:column;gap:clamp(6px,1vw,11px);
+        ">
+          <div class="tl-bulb-g" style="width:clamp(28px,3.5vw,46px);height:clamp(28px,3.5vw,46px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#86EFAC,#22C55E 45%,#15803D);"></div>
+          <div class="tl-bulb-y" style="width:clamp(28px,3.5vw,46px);height:clamp(28px,3.5vw,46px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#FDE68A,#F59E0B 45%,#92400E);"></div>
+          <div class="tl-bulb-r" style="width:clamp(28px,3.5vw,46px);height:clamp(28px,3.5vw,46px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#FCA5A5,#EF4444 45%,#7F1D1D);"></div>
+        </div>
+      </div>
+
+      <div class="f-display" style="font-size:clamp(60px,13vw,148px);color:var(--text);">SIGNAL.</div>
+    </div>
+
+    <p class="rv d3" style="font-size:clamp(16px,2vw,19px);color:var(--muted);max-width:480px;margin:28px auto 44px;line-height:1.75;">
+      
+    </p>
+
+    <div class="rv d4" style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+      <a href="#" class="btn btn-dark">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+        Download on the App Store
+      </a>
+    </div>
+    <div class="rv d4" style="margin-top:12px;font-size:12px;color:var(--faint);">$5.99 · iPhone &amp; iPad · iOS 17+</div>
+
+    <!-- Hero phone mockup, bleeds into next section (click to expand) -->
+    <div class="rv d5" style="margin-top:64px;display:flex;justify-content:center;position:relative;">
+      <!-- fade-out mask at bottom so phone blends gracefully -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to bottom,transparent,var(--bg));pointer-events:none;z-index:2;"></div>
+      <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;" title="Click to expand">
+        <div class="phone" style="width:min(272px,74vw);">
+          <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1631.png" alt="Habit Traffic: Today's Traffic view"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════ THREE LIGHTS ════════════════════ -->
+<section class="section" style="background:var(--bg);">
+  <div class="section-inner">
+
+    <div class="rv" style="text-align:center;margin-bottom:64px;">
+      <div class="label" style="margin-bottom:14px;">The Signal System</div>
+      <h2 class="f-head" style="font-size:clamp(26px,4vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1.1;color:var(--text);">A Clear Signal for Every Habit</h2>
+      <p style="color:var(--muted);margin-top:14px;font-size:16px;max-width:460px;margin-left:auto;margin-right:auto;line-height:1.7;">Just like a real traffic signal, every habit shows exactly where you stand, at a glance, every day.</p>
+    </div>
+
+    <div class="lights-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+
+      <!-- Green -->
+      <div class="scard g rv d1">
+        <div style="width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#86EFAC,#22C55E 45%,#15803D);margin:0 auto 22px;box-shadow:0 0 22px rgba(34,197,94,0.55),0 0 56px rgba(34,197,94,0.2);"></div>
+        <div class="f-head" style="font-size:22px;font-weight:800;color:var(--green);margin-bottom:8px;">Green</div>
+        <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:10px;">You're on track</div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.65;">Habit completed or not due for a while. No action needed. Just keep the momentum going.</p>
+      </div>
+
+      <!-- Yellow -->
+      <div class="scard y rv d2">
+        <div style="width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FDE68A,#F59E0B 45%,#92400E);margin:0 auto 22px;box-shadow:0 0 22px rgba(245,158,11,0.55),0 0 56px rgba(245,158,11,0.2);"></div>
+        <div class="f-head" style="font-size:22px;font-weight:800;color:var(--yellow);margin-bottom:8px;">Yellow</div>
+        <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:10px;">Plan ahead</div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.65;">Habit coming due soon. You still have time, but now is the moment to plan when you'll fit it in.</p>
+      </div>
+
+      <!-- Red -->
+      <div class="scard r rv d3">
+        <div style="width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FCA5A5,#EF4444 45%,#7F1D1D);margin:0 auto 22px;box-shadow:0 0 22px rgba(239,68,68,0.55),0 0 56px rgba(239,68,68,0.2);"></div>
+        <div class="f-head" style="font-size:22px;font-weight:800;color:var(--red);margin-bottom:8px;">Red</div>
+        <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:10px;">Today's the day</div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.65;">This habit needs to be completed today or it'll fall behind. This is what needs your full attention right now.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div style="padding:0 clamp(20px,8vw,100px);"><hr class="hr"></div>
+
+
+<!-- ════════════════════ WHY HABIT TRAFFIC ════════════════════ -->
+<section class="section" style="background:linear-gradient(170deg,#FEF9EC 0%,#FAF0CE 60%,#F5E8B8 100%);">
+  <div class="section-inner">
+
+    <div class="rv" style="text-align:center;margin-bottom:64px;">
+      <h2 class="f-head" style="font-size:clamp(26px,4.5vw,50px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;color:var(--text);">Why do we Need Another<br>Habit Tracking App?!</h2>
+    </div>
+
+    <!-- Punchy intro -->
+    <div class="rv" style="text-align:center;max-width:560px;margin:0 auto 56px;">
+      <p style="font-size:clamp(16px,2vw,20px);color:var(--muted);line-height:1.7;">Most habit apps show you everything at once and hope you figure it out. Habit Traffic tells you exactly what needs you, <strong style="color:var(--text);">right now</strong>.</p>
+    </div>
+
+    <!-- Three phones: main view → status overview → red habits (click to expand a bit) -->
+    <div class="screenshot-overlay" id="screenshotOverlay" aria-hidden="true"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,3vw,32px);align-items:flex-start;max-width:820px;margin:0 auto 56px;">
+
+      <!-- 1. Main view with traffic light callout -->
+      <div class="rv d1" style="text-align:center;display:flex;flex-direction:column;align-items:center;">
+        <div class="callout-slot">
+          <div class="callout-above">
+            <span class="callout-above-label">Tap the Traffic Light Anytime for a Glanceable Status Overview</span>
+            <span class="callout-above-arrow"></span>
+          </div>
+        </div>
+        <div class="screenshot-wrap" role="button" tabindex="0" style="display:inline-block;cursor:pointer;" title="Click to expand">
+          <div class="phone phone-screen" style="max-width:260px;margin:0 auto;">
+            <div class="phone-status-crop">
+              <img src="brand_assets/Fixed screenshots/IMG_1629.png" alt="Today's Traffic with status light">
+            </div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-top:20px;line-height:1.55;">Data at Your Fingertips: Tap the traffic light in the corner to open a status view.</p>
+      </div>
+
+      <!-- 2. Status summary -->
+      <div class="rv d2" style="text-align:center;display:flex;flex-direction:column;align-items:center;">
+        <div class="callout-slot" style="visibility:hidden;" aria-hidden="true"><!-- keeps columns aligned --></div>
+        <div class="screenshot-wrap" role="button" tabindex="0" style="display:inline-block;cursor:pointer;" title="Click to expand">
+          <div class="phone phone-screen" style="max-width:260px;margin:0 auto;">
+            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1626.png" alt="Habit Status Summary"></div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-top:20px;line-height:1.55;">See every color in one place.<br><strong style="color:var(--text);font-weight:600;">Your entire status at a glance.</strong></p>
+      </div>
+
+      <!-- 3. Red habits list -->
+      <div class="rv d3" style="text-align:center;display:flex;flex-direction:column;align-items:center;">
+        <div class="callout-slot" style="visibility:hidden;" aria-hidden="true"><!-- keeps columns aligned --></div>
+        <div class="screenshot-wrap" role="button" tabindex="0" style="display:inline-block;cursor:pointer;" title="Click to expand">
+          <div class="phone phone-screen" style="max-width:260px;margin:0 auto;">
+            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1627.png" alt="Red Habits"></div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-top:20px;line-height:1.55;">Then tap Red to focus.<br><strong style="color:var(--red);font-weight:600;">These need you today.</strong></p>
+      </div>
+
+    </div>
+
+    <!-- Closer -->
+    <div class="rv d4" style="text-align:center;max-width:500px;margin:0 auto;">
+      <p style="font-size:clamp(15px,1.7vw,18px);color:var(--muted);line-height:1.8;">Whether you track 5 habits or 50, <strong style="color:var(--text);font-weight:600;">red means act now, yellow means plan ahead, green means you're good.</strong> No overthinking. No scrolling through a wall of checkboxes. You can filter and sort by status, category, next due, and more!</p>
+    </div>
+
+  </div>
+</section>
+
+
+<div style="padding:0 clamp(20px,8vw,100px);"><hr class="hr"></div>
+
+
+<!-- ════════════════════ SCREENSHOTS ════════════════════ -->
+<section class="section" style="background:var(--bg);">
+  <div class="section-inner">
+
+    <div class="rv" style="text-align:center;margin-bottom:64px;">
+      <div class="label" style="margin-bottom:14px;">The App</div>
+      <h2 class="f-head" style="font-size:clamp(26px,4vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1.1;color:var(--text);">Built for your daily rhythm.</h2>
+      <p style="color:var(--muted);margin-top:14px;font-size:16px;max-width:460px;margin-left:auto;margin-right:auto;line-height:1.7;">From daily check-ins to long-term trends, everything you need to build and sustain real habits.</p>
+    </div>
+
+    <!-- Row 1: 3 phones (click to expand) -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px;align-items:end;max-width:820px;margin:0 auto 72px;overflow:visible;padding-top:32px;">
+
+      <div class="rv d1">
+        <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
+          <div class="phone phone-screen" style="transform:rotate(-3deg) translateY(12px);">
+            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1630.png" alt="Easy Setup"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:28px;padding:0 8px;">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,0.1);border-radius:100px;padding:4px 12px;margin-bottom:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#3B82F6;display:inline-block;"></span>
+            <span style="font-size:11px;font-weight:600;color:#1D4ED8;letter-spacing:0.04em;">SETUP</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">Easy Setup</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.55;">Add any habit in seconds. Set your frequency, category, and daily limit. The app handles the rest.</div>
+        </div>
+      </div>
+
+      <div class="rv d2">
+        <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
+          <div class="phone phone-screen">
+            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1631.png" alt="Today's Traffic"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:28px;padding:0 8px;">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:var(--green-light);border-radius:100px;padding:4px 12px;margin-bottom:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;"></span>
+            <span style="font-size:11px;font-weight:600;color:#166534;letter-spacing:0.04em;">TODAY'S VIEW</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">Today's Traffic</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.55;">All habits grouped by category with live traffic-light status. See exactly what needs your attention today.</div>
+        </div>
+      </div>
+
+      <div class="rv d3">
+        <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
+          <div class="phone phone-screen" style="transform:rotate(3deg) translateY(12px);">
+            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1632.png" alt="Smart Sorting"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:28px;padding:0 8px;">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:var(--yellow-light);border-radius:100px;padding:4px 12px;margin-bottom:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--yellow);display:inline-block;"></span>
+            <span style="font-size:11px;font-weight:600;color:#92400E;letter-spacing:0.04em;">SORTING</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">Smart Sorting</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.55;">Sort by traffic status, name, reset date, or remaining occurrences, so the most urgent habits always rise to the top.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 2: 3 more phones (click to expand) -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px;align-items:end;max-width:820px;margin:0 auto;overflow:visible;padding-top:24px;">
+
+      <div class="rv d1">
+        <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
+          <div class="phone phone-screen" style="transform:rotate(-2deg) translateY(8px);">
+            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1633.png" alt="Statistics"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:28px;padding:0 8px;">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(168,85,247,0.1);border-radius:100px;padding:4px 12px;margin-bottom:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#A855F7;display:inline-block;"></span>
+            <span style="font-size:11px;font-weight:600;color:#7E22CE;letter-spacing:0.04em;">STATISTICS</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">Rich Statistics</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.55;">Streaks, best streaks, success rates, and monthly performance bars for every habit you track.</div>
+        </div>
+      </div>
+
+      <div class="rv d2">
+        <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
+          <div class="phone phone-screen">
+            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1634.png" alt="Analytics"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:28px;padding:0 8px;">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(20,184,166,0.1);border-radius:100px;padding:4px 12px;margin-bottom:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#14B8A6;display:inline-block;"></span>
+            <span style="font-size:11px;font-weight:600;color:#0F766E;letter-spacing:0.04em;">ANALYTICS</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">90-Day Heatmap</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.55;">Visualize your momentum across 90 days. Spot patterns, identify weak weeks, and celebrate your streaks.</div>
+        </div>
+      </div>
+
+      <div class="rv d3">
+        <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
+          <div class="phone phone-screen" style="transform:rotate(2deg) translateY(8px);">
+            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1635.png" alt="Habit Deep-Dive"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:28px;padding:0 8px;">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(168,85,247,0.1);border-radius:100px;padding:4px 12px;margin-bottom:10px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#A855F7;display:inline-block;"></span>
+            <span style="font-size:11px;font-weight:600;color:#7E22CE;letter-spacing:0.04em;">HABIT STATS</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">Habit Deep-Dive</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.55;">Tap any habit for a full breakdown: success rate, streak history, monthly bars, and trend direction over time.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div style="padding:0 clamp(20px,8vw,100px);"><hr class="hr"></div>
+
+
+<!-- ════════════════════ FEATURES GRID ════════════════════ -->
+<section class="section" style="background:var(--bg);">
+  <div class="section-inner">
+
+    <div class="rv" style="text-align:center;margin-bottom:64px;">
+      <div class="label" style="margin-bottom:14px;">What's Included</div>
+      <h2 class="f-head" style="font-size:clamp(26px,4vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1.1;color:var(--text);">Everything you need.<br>Nothing you don't.</h2>
+    </div>
+
+    <div class="feat-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+
+      <div class="feat rv d1">
+        <div class="feat-icon" style="background:var(--green-mid);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        </div>
+        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Daily Dashboard</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">See every habit sorted by category with live traffic-light status. Know what's due before you start your day.</p>
+      </div>
+
+      <div class="feat rv d2">
+        <div class="feat-icon" style="background:rgba(96,165,250,0.12);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        </div>
+        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Rich Statistics</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Streaks, success rates, monthly performance charts, and a 90-day completion heatmap for every single habit.</p>
+      </div>
+
+      <div class="feat rv d3">
+        <div class="feat-icon" style="background:rgba(168,85,247,0.11);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Custom Categories</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Group habits into Health, Fitness, Learning, or any custom category. Collapse what's done and focus on what's left.</p>
+      </div>
+
+      <div class="feat rv d4">
+        <div class="feat-icon" style="background:var(--yellow-mid);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 6.6A9 9 0 1 1 5.6 6.6"/></svg>
+        </div>
+        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">See only what you need to:</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Set a cap on how many habits appear active each day. Focus on what matters most, and let the rest wait their turn.</p>
+      </div>
+
+      <div class="feat rv d5">
+        <div class="feat-icon" style="background:var(--red-mid);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Negative Habits</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Track things you're trying to avoid. Logging them counts against your streak. Real motivation to resist.</p>
+      </div>
+
+      <div class="feat rv d6">
+        <div class="feat-icon" style="background:rgba(20,184,166,0.12);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14B8A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        </div>
+        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Smart Notifications</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Daily color-coded summaries, per-habit reminders, or intelligent alerts that intensify as your deadline nears.</p>
+      </div>
+
+    </div>
+
+    <!-- Works With integrations strip -->
+    <div class="rv" style="margin-top:64px;">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="label" style="margin-bottom:0;">Works With</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+
+        <!-- Shortcuts -->
+        <div class="feat rv d1" style="text-align:center;padding:28px 16px;">
+          <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <img src="brand_assets/OtherApp icons/2.jpeg" alt="Shortcuts" style="width:64px;height:64px;border-radius:16px;display:block;object-fit:cover;">
+          </div>
+          <div class="f-head" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Shortcuts</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Automate habit logging and status checks with Apple Shortcuts flows.</p>
+        </div>
+
+        <!-- iCloud Sync (cloud icon) -->
+        <div class="feat rv d2" style="text-align:center;padding:28px 16px;">
+          <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <img src="brand_assets/OtherApp icons/Unknown.jpg" alt="iCloud Sync" style="width:64px;height:64px;border-radius:16px;display:block;object-fit:cover;">
+          </div>
+          <div class="f-head" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">iCloud Sync</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Habits, history, and settings stay in sync across all your Apple devices.</p>
+        </div>
+
+        <!-- Apple Watch (icon to be uploaded) -->
+        <div class="feat rv d3" style="text-align:center;padding:28px 16px;">
+          <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(160deg,#1C1C1E,#3A3A3C);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.28);">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="6" y="6" width="12" height="13" rx="4.5"/>
+                <path d="M9 6V4h6v2"/>
+                <path d="M9 19v2h6v-2"/>
+                <path d="M12 9.5v3l1.5 1"/>
+              </svg>
+            </div>
+          </div>
+          <div class="f-head" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Apple Watch</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Check traffic-light status and log habits right from your wrist.</p>
+        </div>
+
+        <!-- Todoist (icon from OtherApp icons) -->
+        <div class="feat rv d4" style="text-align:center;padding:28px 16px;">
+          <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <img src="brand_assets/OtherApp icons/3.jpg.png" alt="Todoist" style="width:64px;height:64px;border-radius:16px;display:block;object-fit:cover;">
+          </div>
+          <div class="f-head" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Todoist</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Habit Traffic integrates directly with Todoist. Turn today's red habits into Todoist tasks due today, and when you check them off in Habit Traffic, their linked Todoist tasks complete automatically.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<div style="padding:0 clamp(20px,8vw,100px);"><hr class="hr"></div>
+
+
+<!-- ════════════════════ CTA ════════════════════ -->
+<section class="section" style="background:var(--bg);">
+  <div class="section-inner">
+    <div class="rv" style="
+      background: var(--dark);
+      border-radius: 32px;
+      padding: clamp(52px,7vw,96px) clamp(28px,6vw,80px);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.22), 0 4px 20px rgba(0,0,0,0.1);
+    ">
+
+      <!-- Ambient cycling glow -->
+      <div class="amb-g" style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 70%,rgba(34,197,94,0.22) 0%,transparent 70%);pointer-events:none;"></div>
+      <div class="amb-y" style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 70%,rgba(245,158,11,0.18) 0%,transparent 70%);pointer-events:none;"></div>
+      <div class="amb-r" style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 70%,rgba(239,68,68,0.18) 0%,transparent 70%);pointer-events:none;"></div>
+
+      <!-- Static all-green traffic light -->
+      <div style="display:flex;justify-content:center;margin-bottom:32px;position:relative;">
+        <div style="
+          background: linear-gradient(160deg,#2C2C2A,#1A1A18);
+          border-radius: 18px; padding: 12px 10px;
+          border: 1px solid rgba(255,255,255,0.06);
+          box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+          display:flex;flex-direction:column;gap:8px;
+        ">
+          <div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#86EFAC,#22C55E 45%,#15803D);box-shadow:0 0 16px rgba(34,197,94,0.8),0 0 40px rgba(34,197,94,0.3);"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FDE68A,#F59E0B 45%,#92400E);opacity:0.12;"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FCA5A5,#EF4444 45%,#7F1D1D);opacity:0.12;"></div>
+        </div>
+      </div>
+
+      <div class="label" style="margin-bottom:14px;color:rgba(255,255,255,0.35);position:relative;">Available Now on the App Store</div>
+      <h2 class="f-head" style="font-size:clamp(28px,5vw,52px);font-weight:800;letter-spacing:-0.025em;line-height:1.1;margin-bottom:16px;position:relative;color:#fff;">
+        Start building better<br>habits today.
+      </h2>
+      <p style="color:rgba(255,255,255,0.45);font-size:16px;max-width:400px;margin:0 auto 36px;line-height:1.7;position:relative;">
+        $5.99 one-time purchase. No subscription. Just a clearer way to see what your habits need.
+      </p>
+
+      <div style="position:relative;">
+        <a href="#" class="btn btn-green" style="font-size:15px;padding:15px 34px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
+          Download on the App Store
+        </a>
+        <div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.25);">$5.99 · iPhone &amp; iPad · iOS 17+</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════ FOOTER ════════════════════ -->
+<footer style="background:var(--bg2);border-top:1px solid var(--border);padding:36px clamp(20px,8vw,100px);">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="brand_assets/Habbit AppIcon 1.png" alt="Habit Traffic" style="width:24px;height:24px;border-radius:6px;opacity:0.4;">
+      <span style="font-size:13px;color:var(--faint);">© 2026 chaiwellness</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:24px;">
+      <a href="https://discord.gg/" target="_blank" rel="noopener"
+         style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--faint);transition:color 0.2s;"
+         onmouseover="this.style.color='#5865F2'" onmouseout="this.style.color='var(--faint)'">
+        <svg width="14" height="14" viewBox="0 0 127.14 96.36" fill="currentColor">
+          <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+        </svg>
+        Discord
+      </a>
+      <a href="mailto:habittrafficapp@gmail.com"
+         style="font-size:13px;color:var(--faint);transition:color 0.2s;"
+         onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--faint)'">
+        habittrafficapp@gmail.com
+      </a>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ════════════════════ SCRIPTS ════════════════════ -->
+<script>
+  // Scroll reveal
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+
+  // Trigger hero elements immediately
+  setTimeout(() => {
+    document.querySelectorAll('#hero .rv').forEach(el => el.classList.add('in'));
+  }, 80);
+
+  // Screenshot: click to expand a bit (not full page)
+  const overlay = document.getElementById('screenshotOverlay');
+  function closeScreenshot() {
+    document.querySelectorAll('.screenshot-wrap.expanded').forEach(w => w.classList.remove('expanded'));
+    if (overlay) overlay.classList.remove('on');
+  }
+  document.querySelectorAll('.screenshot-wrap').forEach(w => {
+    w.addEventListener('click', () => {
+      w.classList.toggle('expanded');
+      if (overlay) overlay.classList.toggle('on', !!document.querySelector('.screenshot-wrap.expanded'));
+    });
+    w.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); w.click(); } });
+  });
+  if (overlay) overlay.addEventListener('click', closeScreenshot);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeScreenshot(); });
+</script>
+
+</body>
+</html>
