@@ -395,6 +395,22 @@
       .feat-grid { grid-template-columns: 1fr !important; }
       .integrations-grid { grid-template-columns: 1fr !important; }
     }
+    @media (max-width: 640px) {
+      /* Reduce section padding so gaps between sections aren't huge */
+      .section { padding: 56px clamp(16px, 5vw, 32px) !important; }
+      /* CTA section: flush to edges on mobile, dark block fills width */
+      .section.cta-section { padding: 0 !important; }
+      .section.cta-section .section-inner { max-width: 100%; }
+      .section.cta-section .rv { border-radius: 0 !important; }
+      /* CTA heading smaller on mobile */
+      .cta-heading { font-size: clamp(20px, 5.5vw, 28px) !important; line-height: 1.15 !important; }
+      /* CTA button: smaller font, don't wrap */
+      .cta-btn { font-size: 13px !important; padding: 13px 22px !important; }
+      /* Integrations: 2 columns on small screens */
+      .integrations-grid { grid-template-columns: 1fr 1fr !important; }
+      /* Callout pill: allow wrapping */
+      .callout-above-label { font-size: 11px !important; }
+    }
   </style>
 </head>
 <body>
@@ -672,8 +688,7 @@
 
     <div class="rv" style="text-align:center;margin-bottom:64px;">
 
-      <h2 class="f-head" style="font-size:clamp(26px,4vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1.1;color:var(--text);">Built for your daily rhythm.</h2>
-      <p style="color:var(--muted);margin-top:14px;font-size:16px;max-width:460px;margin-left:auto;margin-right:auto;line-height:1.7;">From daily check-ins to long-term trends, everything you need to build and sustain real habits.</p>
+      <h2 class="f-head" style="font-size:clamp(26px,4vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1.1;color:var(--text);">Everything you need to build habits that actually stick.</h2>
     </div>
 
     <!-- Row 1: 3 phones (click to expand) -->
@@ -884,7 +899,7 @@
 
 
 <!-- ════════════════════ CTA ════════════════════ -->
-<section class="section" style="background:var(--bg);">
+<section class="section cta-section" style="background:var(--bg);">
   <div class="section-inner">
     <div class="rv" style="
       background: var(--dark);
@@ -917,7 +932,7 @@
       </div>
 
       <div class="label" style="margin-bottom:14px;color:rgba(255,255,255,0.35);position:relative;">Available Now on the App Store</div>
-      <h2 class="f-head" style="font-size:clamp(28px,5vw,52px);font-weight:800;letter-spacing:-0.025em;line-height:1.1;margin-bottom:16px;position:relative;color:#fff;">
+      <h2 class="f-head cta-heading" style="font-size:clamp(28px,5vw,52px);font-weight:800;letter-spacing:-0.025em;line-height:1.1;margin-bottom:16px;position:relative;color:#fff;">
         Your habits have been waiting<br>for a clearer signal.
       </h2>
       <p style="color:rgba(255,255,255,0.45);font-size:16px;max-width:400px;margin:0 auto 36px;line-height:1.7;position:relative;">
@@ -925,7 +940,7 @@
       </p>
 
       <div style="position:relative;">
-        <a href="#" class="btn btn-green" style="font-size:15px;padding:15px 34px;">
+        <a href="#" class="btn btn-green cta-btn" style="font-size:15px;padding:15px 34px;white-space:nowrap;">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
           </svg>
