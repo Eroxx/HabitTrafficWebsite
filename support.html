@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Traffic &mdash; Support</title>
+  <meta name="description" content="Help with Habit Traffic: what the traffic light colours mean, syncing, the Apple Watch app, custom sounds, and how to get in touch.">
+  <link rel="canonical" href="https://habittraffic.com/support.html">
+
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://habittraffic.com/support.html">
+  <meta property="og:site_name" content="Habit Traffic">
+  <meta property="og:title" content="Habit Traffic &mdash; Support">
+  <meta property="og:description" content="Help with Habit Traffic: what the traffic light colours mean, syncing, the Apple Watch app, custom sounds, and how to get in touch.">
+  <meta property="og:image" content="https://habittraffic.com/og-image.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green:#009900; --yellow:#E5BF00; --red:#CC0000; --purple:#8000CC;
+      --bg:#F7F6F2; --surf:#FFFFFF; --border:rgba(0,0,0,0.07); --border-med:rgba(0,0,0,0.11);
+      --text:#111110; --muted:#2E2E2D; --faint:#4A4A48; --dark:#111110;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html { -webkit-font-smoothing:antialiased; }
+    body {
+      background:var(--bg); color:var(--text);
+      font-family:'DM Sans', system-ui, sans-serif; line-height:1.65;
+    }
+    body::after {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:9000; opacity:0.035;
+      background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23g)'/%3E%3C/svg%3E");
+    }
+    .f-display { font-family:'Bebas Neue', sans-serif; line-height:0.92; letter-spacing:0.01em; }
+    .f-head { font-family:'Manrope', sans-serif; }
+    .wrap { max-width:720px; margin:0 auto; padding:0 24px; }
+    header { border-bottom:1px solid var(--border); background:var(--surf); }
+    header .wrap { display:flex; align-items:center; gap:12px; padding-top:18px; padding-bottom:18px; }
+    header img { width:34px; height:34px; border-radius:8px; }
+    header a.brand { font-family:'Manrope',sans-serif; font-weight:800; color:var(--text); text-decoration:none; font-size:17px; }
+    header nav { margin-left:auto; display:flex; gap:18px; }
+    header nav a { color:var(--faint); text-decoration:none; font-size:14.5px; }
+    header nav a:hover { color:var(--text); }
+    main { padding:56px 0 72px; }
+    h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(44px,8vw,68px); line-height:0.95; letter-spacing:0.01em; }
+    .lede { color:var(--muted); font-size:18px; margin-top:14px; }
+    .stamp { color:var(--faint); font-size:14px; margin-top:8px; }
+    h2 { font-family:'Manrope',sans-serif; font-weight:800; font-size:21px; margin:38px 0 10px; }
+    h3 { font-family:'Manrope',sans-serif; font-weight:700; font-size:16.5px; margin:22px 0 4px; }
+    p { color:var(--muted); margin:9px 0; }
+    ul { margin:10px 0 10px 22px; color:var(--muted); }
+    li { margin:6px 0; }
+    a { color:var(--text); }
+    .card {
+      background:var(--surf); border:1px solid var(--border-med); border-radius:16px;
+      padding:22px 24px; margin:26px 0;
+    }
+    .card.short p:first-child { margin-top:0; }
+    .lights { display:flex; gap:7px; margin-bottom:14px; }
+    .lights span { width:11px; height:11px; border-radius:50%; display:block; }
+    .btn {
+      display:inline-block; background:var(--dark); color:#fff; text-decoration:none;
+      font-family:'Manrope',sans-serif; font-weight:700; font-size:15px;
+      padding:13px 22px; border-radius:11px; margin:6px 10px 6px 0;
+    }
+    .btn.alt { background:var(--surf); color:var(--text); border:1px solid var(--border-med); }
+    footer { border-top:1px solid var(--border); padding:30px 0 46px; }
+    footer .wrap { display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+    footer a { color:var(--faint); text-decoration:none; font-size:14.5px; }
+    footer a:hover { color:var(--text); }
+    footer .sp { margin-left:auto; color:var(--faint); font-size:14px; }
+    @media (max-width:520px) { footer .sp { margin-left:0; width:100%; } }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <img src="apple-touch-icon.png" alt="">
+    <a class="brand" href="/">Habit Traffic</a>
+    <nav><a href="/">Home</a><a href="privacy.html">Privacy</a><a href="support.html">Support</a></nav>
+  </div>
+</header>
+<main><div class="wrap">
+<h1>Support</h1>
+<p class="lede">Something not working, or not behaving the way you expected? Here is the quickest way to get an answer.</p>
+
+<div class="card short">
+  <p><strong>Email me directly.</strong> It is one person building this, and I read everything.</p>
+  <a class="btn" href="mailto:habittrafficapp@gmail.com">habittrafficapp@gmail.com</a>
+  <a class="btn alt" href="https://discord.gg/UMyVU4ZVkx">Join the Discord</a>
+</div>
+
+<h2>What Habit Traffic does</h2>
+<p>Every habit gets a traffic light. The colour tells you how much room you have left before you fall behind, so you can look at a list and know what actually needs doing today without counting anything.</p>
+
+<h2>What the colours mean</h2>
+<ul>
+  <li><strong style="color:var(--green)">Green</strong> &mdash; you have slack. You could skip today and tomorrow and still hit the goal.</li>
+  <li><strong style="color:var(--yellow)">Yellow</strong> &mdash; tomorrow is the last comfortable day.</li>
+  <li><strong style="color:var(--red)">Red</strong> &mdash; it has to happen today to stay on target.</li>
+  <li><strong>Black</strong> &mdash; the goal can no longer be met in this period. It resets when the period does.</li>
+  <li><strong style="color:var(--purple)">Complete</strong> &mdash; you have already met the goal for this period.</li>
+</ul>
+
+<h2>Common questions</h2>
+
+<h3>A brand new habit shows black. Why?</h3>
+<p>It shouldn't, and if it does you are on an old build. A bug that gave month-long habits a one-day first period was fixed in August 2026. Update to the latest version and the habit will read green.</p>
+
+<h3>My habits are not on my other device</h3>
+<p>Both devices need to be signed in to the same iCloud account with iCloud Drive on. Sync is Apple's CloudKit, so it can take a moment after a change, and it needs a network connection at some point on both ends.</p>
+
+<h3>Does it work on Apple Watch?</h3>
+<p>Yes. The watch app shows each habit's status and lets you log a completion from your wrist. It syncs with the phone.</p>
+
+<h3>Can I use my own sounds?</h3>
+<p>Yes. You can record a sound in the app, trim it, and assign it to a habit, or choose from the built-in library. Recordings stay on your device and in your own iCloud.</p>
+
+<h3>What is a negative habit?</h3>
+<p>A habit you are trying to do <em>less</em> of. Instead of a target you set a limit, and the app tracks how many allowances you have left in the period.</p>
+
+<h3>Can I fix a day I forgot to log?</h3>
+<p>Yes. Open the habit's history and edit past days; streaks and statistics recalculate from the corrected history.</p>
+
+<h3>How do I back up, or start over?</h3>
+<p>Settings keeps recent backups you can view and restore from. The same screen has <strong>Delete all data</strong> to clear everything from the device and your iCloud database, and a demo data option if you want to see the app populated before committing to your own habits.</p>
+
+<h3>Notifications are not arriving</h3>
+<p>Check that notifications are allowed for Habit Traffic in the iOS Settings app, then check the notification settings inside Habit Traffic. Individual habits can also carry their own reminder times.</p>
+
+<h2>Reporting a bug</h2>
+<p>The most useful report says what you expected, what happened instead, and which device and iOS version you are on. Email or Discord both work; Discord has a <strong>#bug-reports</strong> channel.</p>
+
+<h2>Privacy</h2>
+<p>Habit Traffic collects nothing about you and has no server. The details are on the <a href="privacy.html">privacy page</a>.</p>
+</div></main>
+<footer><div class="wrap">
+  <a href="/">Home</a>
+  <a href="privacy.html">Privacy</a>
+  <a href="support.html">Support</a>
+  <a href="https://discord.gg/UMyVU4ZVkx">Discord</a>
+  <a href="mailto:habittrafficapp@gmail.com">habittrafficapp@gmail.com</a>
+  <span class="sp">&copy; 2026 Eric Linder</span>
+</div></footer>
+</body>
+</html>
