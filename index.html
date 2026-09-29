@@ -204,6 +204,39 @@
       box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 4px 20px rgba(0,0,0,0.15), 0 20px 48px rgba(0,0,0,0.2);
     }
     .phone.phone-screen::before { display: none; }
+    /* Fan of surfaces. Four screens that look DIFFERENT — a list, a summary, one habit, a
+       chart — because a fan of near-identical screens reads as one screenshot repeated. */
+    .fan {
+      display: flex; justify-content: center; align-items: flex-end;
+      flex-wrap: wrap; padding: 10px 0 0;
+    }
+    .fan-item {
+      width: min(200px, 40vw); margin: 0;
+      transform: rotate(var(--r)) translateY(var(--y, 0));
+      transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .fan-item + .fan-item { margin-left: -30px; }
+    .fan-item:hover, .fan-item:focus-within {
+      transform: rotate(0deg) translateY(-14px) scale(1.05); z-index: 20;
+    }
+    .fan-item figcaption {
+      margin-top: 14px; text-align: center;
+      font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.01em;
+    }
+    /* At phone width the overlap hides the very thing the fan is showing, so it unfolds.
+       A grid, not a flex row: `minmax(0, 1fr)` cannot overflow its container, whereas fixed
+       item widths plus the 8px bezel on each phone pushed two columns past a 390px screen. */
+    @media (max-width: 780px) {
+      .fan { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 14px; }
+      .fan-item { width: auto; transform: none; }
+      .fan-item + .fan-item { margin-left: 0; }
+      .fan-item:hover, .fan-item:focus-within { transform: translateY(-8px) scale(1.03); }
+    }
+    /* Below ~480px two phones side by side leave each one too small to read. One column. */
+    @media (max-width: 480px) {
+      .fan { grid-template-columns: minmax(0, 1fr); gap: 26px; justify-items: center; }
+      .fan-item { max-width: 240px; }
+    }
     .phone-status-crop {
       overflow: hidden;
       border-radius: 36px;
@@ -513,7 +546,7 @@
         Coming soon to the App Store
       </span>
     </div>
-    <div class="rv d4" style="margin-top:12px;font-size:12px;font-weight:500;color:var(--text);">$5.99 · iPhone &amp; iPad · iOS 17+</div>
+    <div class="rv d4" style="margin-top:12px;font-size:12px;font-weight:500;color:var(--text);">$5.99 · iPhone, iPad &amp; Apple Watch · iOS 17+</div>
 
     <!-- Hero phone mockup with side copy -->
     <div class="rv d5 hero-phone-row" style="margin-top:64px;display:flex;align-items:center;justify-content:center;gap:clamp(24px,4vw,56px);">
@@ -521,7 +554,7 @@
       <!-- Left copy -->
       <div class="hero-side-copy" style="flex:1;max-width:200px;text-align:right;">
         <div style="font-family:'DM Sans',sans-serif;">
-          <p style="font-size:clamp(14px,1.6vw,17px);font-weight:500;color:var(--text);line-height:1.65;margin:0;">The most efficient habit tracker that actually helps you get things done.</p>
+          <p style="font-size:clamp(14px,1.6vw,17px);font-weight:500;color:var(--text);line-height:1.65;margin:0;">Every habit tracker shows your habits.</p>
         </div>
       </div>
 
@@ -530,13 +563,13 @@
         <div class="phone phone-screen" style="width:min(310px,58vw);transform:rotate(4deg);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);"
           onmouseover="this.style.transform='rotate(1deg) scale(1.02)'"
           onmouseout="this.style.transform='rotate(4deg)'">
-          <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1631.png" alt="Habit Traffic: Today's Traffic view"></div>
+          <div class="phone-status-crop"><img src="brand_assets/iphone-todays-traffic.png" alt="Habit Traffic: Today's Traffic view"></div>
         </div>
       </div>
 
       <!-- Right copy -->
       <div class="hero-side-copy" style="flex:1;max-width:200px;text-align:left;">
-        <p style="font-family:'DM Sans',sans-serif;font-size:clamp(14px,1.6vw,17px);font-weight:500;color:var(--text);line-height:1.7;margin:0;">Habit Traffic shows you what habits need you today, and what can wait until tomorrow.</p>
+        <p style="font-family:'DM Sans',sans-serif;font-size:clamp(14px,1.6vw,17px);font-weight:500;color:var(--text);line-height:1.7;margin:0;">Habit Traffic helps you <strong style="font-weight:700;">do</strong> them.</p>
       </div>
 
     </div>
@@ -573,7 +606,7 @@
         <div class="screenshot-wrap" role="button" tabindex="0" style="display:inline-block;cursor:pointer;" title="Click to expand">
           <div class="phone phone-screen" style="max-width:260px;margin:0 auto;">
             <div class="phone-status-crop">
-              <img src="brand_assets/Fixed screenshots/IMG_1629.png" alt="Today's Traffic with status light">
+              <img src="brand_assets/iphone-todays-traffic.png" alt="Today's Traffic: every habit with its traffic-light status, and the status summary in the top left corner">
             </div>
           </div>
         </div>
@@ -585,7 +618,7 @@
         <div class="callout-slot" style="visibility:hidden;" aria-hidden="true"><!-- keeps columns aligned --></div>
         <div class="screenshot-wrap" role="button" tabindex="0" style="display:inline-block;cursor:pointer;" title="Click to expand">
           <div class="phone phone-screen" style="max-width:260px;margin:0 auto;">
-            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1626.png" alt="Habit Status Summary"></div>
+            <div class="phone-status-crop"><img src="brand_assets/iphone-status-summary.png" alt="Habit Status Summary"></div>
           </div>
         </div>
         <p style="font-size:13px;color:var(--muted);margin-top:20px;line-height:1.55;">See every color in one place.<br><strong style="color:var(--text);font-weight:600;">Your entire status at a glance.</strong></p>
@@ -596,7 +629,7 @@
         <div class="callout-slot" style="visibility:hidden;" aria-hidden="true"><!-- keeps columns aligned --></div>
         <div class="screenshot-wrap" role="button" tabindex="0" style="display:inline-block;cursor:pointer;" title="Click to expand">
           <div class="phone phone-screen" style="max-width:260px;margin:0 auto;">
-            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1627.png" alt="Red Habits"></div>
+            <div class="phone-status-crop"><img src="brand_assets/iphone-red-habits.png" alt="Red Habits"></div>
           </div>
         </div>
         <p style="font-size:13px;color:var(--muted);margin-top:20px;line-height:1.55;">Then tap Red to focus.<br><strong style="color:var(--red);font-weight:600;">These need you today.</strong></p>
@@ -701,7 +734,7 @@
       <div class="rv d1">
         <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
           <div class="phone phone-screen" style="transform:rotate(-3deg) translateY(12px);">
-            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1630.png" alt="Easy Setup"></div>
+            <div class="phone-status-crop"><img src="brand_assets/iphone-new-habit.png" alt="Easy Setup"></div>
           </div>
         </div>
         <div style="text-align:center;margin-top:28px;padding:0 8px;">
@@ -713,7 +746,7 @@
       <div class="rv d2">
         <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
           <div class="phone phone-screen">
-            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1631.png" alt="Today's Traffic"></div>
+            <div class="phone-status-crop"><img src="brand_assets/iphone-todays-traffic.png" alt="Today's Traffic"></div>
           </div>
         </div>
         <div style="text-align:center;margin-top:28px;padding:0 8px;">
@@ -725,7 +758,7 @@
       <div class="rv d3">
         <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
           <div class="phone phone-screen" style="transform:rotate(3deg) translateY(12px);">
-            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1632.png" alt="Smart Sorting"></div>
+            <div class="phone-status-crop"><img src="brand_assets/iphone-sort-menu.png" alt="Smart Sorting"></div>
           </div>
         </div>
         <div style="text-align:center;margin-top:28px;padding:0 8px;">
@@ -742,7 +775,7 @@
       <div class="rv d1">
         <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
           <div class="phone phone-screen" style="transform:rotate(-2deg) translateY(8px);">
-            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1633.png" alt="Statistics"></div>
+            <div class="phone-status-crop"><img src="brand_assets/iphone-statistics.png" alt="Statistics"></div>
           </div>
         </div>
         <div style="text-align:center;margin-top:28px;padding:0 8px;">
@@ -754,7 +787,7 @@
       <div class="rv d2">
         <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
           <div class="phone phone-screen">
-            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1634.png" alt="Analytics"></div>
+            <div class="phone-status-crop"><img src="brand_assets/iphone-analytics.png" alt="Analytics"></div>
           </div>
         </div>
         <div style="text-align:center;margin-top:28px;padding:0 8px;">
@@ -766,7 +799,7 @@
       <div class="rv d3">
         <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
           <div class="phone phone-screen" style="transform:rotate(2deg) translateY(8px);">
-            <div class="phone-status-crop"><img src="brand_assets/Fixed screenshots/IMG_1635.png" alt="Habit Deep-Dive"></div>
+            <div class="phone-status-crop"><img src="brand_assets/iphone-habit-detail.png" alt="Habit Deep-Dive"></div>
           </div>
         </div>
         <div style="text-align:center;margin-top:28px;padding:0 8px;">
@@ -855,6 +888,37 @@
 
     </div>
 
+    <!-- Fan of surfaces. Added 2026-09-27. Deliberately NOT a fan of sort orders: four lists
+         of the same habits in a different order look like one screenshot repeated once they
+         are shrunk and rotated, and the open sort menu already says all eight orders in words,
+         which survives thumbnailing in a way a reordered list does not. -->
+    <div class="rv" style="margin-top:72px;">
+      <div style="text-align:center;margin-bottom:34px;">
+        <div class="f-head" style="margin-bottom:10px;font-size:clamp(22px,3vw,32px);font-weight:800;color:var(--text);letter-spacing:-0.02em;">More than a list</div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.65;max-width:440px;margin:0 auto;">Group them, order them by signal, or open one habit and read its whole record.</p>
+      </div>
+      <div class="fan">
+        <figure class="fan-item" style="--r:-7deg;--y:8px;z-index:1;">
+          <div class="phone phone-screen">
+            <div class="phone-status-crop"><img src="brand_assets/iphone-category-view.png" alt="Habits grouped under colored category headings, with a collapse control"></div>
+          </div>
+          <figcaption>Grouped by category</figcaption>
+        </figure>
+        <figure class="fan-item" style="--r:0deg;--y:0;z-index:2;">
+          <div class="phone phone-screen">
+            <div class="phone-status-crop"><img src="brand_assets/iphone-traffic-sort.png" alt="The habit list ordered from green through to red"></div>
+          </div>
+          <figcaption>Sorted by signal</figcaption>
+        </figure>
+        <figure class="fan-item" style="--r:7deg;--y:8px;z-index:3;">
+          <div class="phone phone-screen">
+            <div class="phone-status-crop"><img src="brand_assets/iphone-habit-stats.png" alt="A success dial, completion history and a trend read-out for a single habit"></div>
+          </div>
+          <figcaption>One habit's whole record</figcaption>
+        </figure>
+      </div>
+    </div>
+
     <!-- Works With integrations strip -->
     <div class="rv" style="margin-top:64px;">
       <div style="text-align:center;margin-bottom:36px;">
@@ -884,7 +948,7 @@
           <p style="font-size:12px;color:var(--muted);line-height:1.6;">Your habits, history, and settings stay current across all your Apple devices. Pick up right where you left off.</p>
         </div>
 
-        <!-- Apple Watch (icon to be uploaded) -->
+        <!-- Apple Watch -->
         <div class="feat rv d3" style="text-align:center;padding:28px 16px;">
           <div style="display:flex;justify-content:center;margin-bottom:16px;">
             <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(160deg,#1C1C1E,#3A3A3C);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.28);">
@@ -897,18 +961,58 @@
             </div>
           </div>
           <div class="f-head" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Apple Watch</div>
-          <p style="font-size:12px;color:var(--muted);line-height:1.6;">See your traffic-light status and log completions right from your wrist. No phone needed.</p>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">See your traffic-light status and log completions right from your wrist, synced with your iPhone.</p>
         </div>
 
-        <!-- Todoist (icon from OtherApp icons) -->
+        <!-- Widgets. Replaced the Todoist card on 2026-09-27: that integration was removed
+             from the app on 2026-08-17 and the page was still advertising it in detail. -->
         <div class="feat rv d4" style="text-align:center;padding:28px 16px;">
           <div style="display:flex;justify-content:center;margin-bottom:16px;">
-            <img src="brand_assets/OtherApp icons/3.jpg.png" alt="Todoist" style="width:64px;height:64px;border-radius:16px;display:block;object-fit:cover;">
+            <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(160deg,#1C1C1E,#3A3A3C);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.28);" aria-hidden="true">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2"/>
+                <rect x="13" y="3.5" width="7.5" height="7.5" rx="2"/>
+                <rect x="3.5" y="13" width="7.5" height="7.5" rx="2"/>
+                <rect x="13" y="13" width="7.5" height="7.5" rx="2"/>
+              </svg>
+            </div>
           </div>
-          <div class="f-head" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Todoist</div>
-          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Red habits automatically become Todoist tasks due today. Check them off in either app and both update in sync.</p>
+          <div class="f-head" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Widgets</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Put your red, yellow, or green habits on your Home Screen, and tap one to mark it done without opening the app.</p>
         </div>
 
+      </div>
+
+      <!-- iPad and Watch, both real screenshots captured 2026-09-27. The watch card above had
+           carried a drawn placeholder icon since the page was built, and the iPad was not
+           mentioned anywhere despite the app shipping a genuine split-view layout for it.
+           They share one band because they answer the same question: what else runs this. -->
+      <div class="rv" style="margin-top:76px;">
+        <div style="text-align:center;margin-bottom:34px;">
+          <div class="f-head" style="font-size:clamp(22px,3vw,32px);font-weight:800;color:var(--text);letter-spacing:-0.02em;margin-bottom:10px;">iPad and Apple Watch too</div>
+          <p style="font-size:14px;color:var(--muted);line-height:1.65;max-width:440px;margin:0 auto;">One purchase, every screen. Your habits stay in step through iCloud.</p>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:clamp(28px,6vw,64px);">
+
+          <figure style="margin:0;max-width:min(340px,74vw);">
+            <img src="brand_assets/ipad-split.png"
+                 alt="Habit Traffic on iPad: the habit list on the left, and one habit's progress, streaks and month calendar on the right"
+                 style="width:100%;height:auto;display:block;">
+            <figcaption style="margin-top:16px;text-align:center;font-size:13px;color:var(--muted);line-height:1.6;">
+              <strong style="color:var(--text);font-weight:600;">On iPad</strong><br>The list and one habit's whole history, side by side.
+            </figcaption>
+          </figure>
+
+          <figure style="margin:0;max-width:min(180px,46vw);">
+            <img src="brand_assets/watch-ultra-habits.png"
+                 alt="Habit Traffic on Apple Watch, showing three habits with green and yellow status"
+                 style="width:100%;height:auto;display:block;">
+            <figcaption style="margin-top:16px;text-align:center;font-size:13px;color:var(--muted);line-height:1.6;">
+              <strong style="color:var(--text);font-weight:600;">On your wrist</strong><br>Check where your habits stand, and tap one to log it.
+            </figcaption>
+          </figure>
+
+        </div>
       </div>
     </div>
 
@@ -954,7 +1058,7 @@
           </svg>
           Coming soon to the App Store
         </span>
-        <div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.25);">$5.99 · iPhone &amp; iPad · iOS 17+</div>
+        <div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.25);">$5.99 · iPhone, iPad &amp; Apple Watch · iOS 17+</div>
       </div>
 
     </div>
