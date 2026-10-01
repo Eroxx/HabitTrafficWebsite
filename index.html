@@ -248,6 +248,9 @@
       display: block;
       vertical-align: middle;
     }
+    /* The hero video: same screen shape as the screenshots, its own clean 9:41 status bar, so no mask. */
+    .phone-status-crop video { width: 100%; height: auto; display: block; }
+    .phone-status-crop.is-video::before { display: none; }
     /* Mask out OS status bar area on all screenshots */
     .phone-status-crop::before {
       content: '';
@@ -570,7 +573,10 @@
         <div class="phone phone-screen" style="width:min(310px,58vw);transform:rotate(4deg);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);"
           onmouseover="this.style.transform='rotate(1deg) scale(1.02)'"
           onmouseout="this.style.transform='rotate(4deg)'">
-          <div class="phone-status-crop"><img src="brand_assets/iphone-todays-traffic.png" alt="Habit Traffic: Today's Traffic view"></div>
+          <div class="phone-status-crop is-video"><video data-themed="traffic-demo" autoplay muted loop playsinline preload="metadata" width="600" height="1304"
+              poster="brand_assets/traffic-demo-poster.webp" aria-label="Habit Traffic's Today's Traffic list: Journaling opens to show 1 of 3 completions with 3 days left, then Read 30 min goes from red to purple and Weekly review from yellow to purple as they are completed">
+            <source src="brand_assets/traffic-demo.mp4" type="video/mp4">
+          </video></div>
         </div>
       </div>
 
@@ -580,6 +586,7 @@
       </div>
 
     </div>
+    <p class="rv d5" style="font-size:13px;color:var(--muted);line-height:1.6;max-width:420px;margin:28px auto 0;">Each colour says how much room a habit has left this period. Do a red or a yellow one and it turns purple: done.</p>
 
   </div>
 </section>
@@ -1144,6 +1151,26 @@
     w.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); w.click(); } });
   });
   if (overlay) overlay.addEventListener('click', closeScreenshot);
+
+  // Videos with a light and a dark version (same pattern as Crate's site.js).
+  (function () {
+    var vids = document.querySelectorAll("video[data-themed]");
+    if (!vids.length || !window.matchMedia) return;
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var pick = function () {
+      vids.forEach(function (v) {
+        var base = "brand_assets/" + v.getAttribute("data-themed") + (mq.matches ? "-dark" : "");
+        if (v.currentSrc && v.currentSrc.indexOf(base + ".mp4") !== -1) return;
+        v.poster = base + "-poster.webp";
+        v.muted = true; v.src = base + ".mp4"; v.load();
+        if (still) { v.removeAttribute("autoplay"); v.controls = true; return; }
+        var p = v.play(); if (p && p.catch) p.catch(function () {});
+      });
+    };
+    pick();
+    if (mq.addEventListener) mq.addEventListener("change", pick);
+  })();
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeScreenshot(); });
 </script>
 
