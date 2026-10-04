@@ -331,12 +331,15 @@
       cursor: default;
       user-select: none;
     }
-    /* Colored wash backgrounds */
-    .scard.g { background: linear-gradient(160deg, #F0FDF4, var(--green-light)); border-color: rgba(0,153,0,0.22); }
-    .scard.y { background: linear-gradient(160deg, #FFFDE7, var(--yellow-light)); border-color: rgba(229,191,0,0.28); }
-    .scard.r { background: linear-gradient(160deg, #FFF5F5, var(--red-light));   border-color: rgba(204,0,0,0.22); }
+    /* Colored wash backgrounds, with the soft glow at the bottom drawn as a radial gradient.
+       The glow used to be a 220px circle under filter:blur(55px) inside this clipped, rounded,
+       scroll-animated card; browsers rasterise that blur in tiles and the clip cut them with
+       hard edges, which showed as rectangles and seams across the cards (2026-10-04). */
+    .scard.g { background: radial-gradient(ellipse 75% 60% at 50% 112%, rgba(0,153,0,0.22), rgba(0,153,0,0) 70%), linear-gradient(160deg, #F0FDF4, var(--green-light)); border-color: rgba(0,153,0,0.22); }
+    .scard.y { background: radial-gradient(ellipse 75% 60% at 50% 112%, rgba(229,191,0,0.24), rgba(229,191,0,0) 70%), linear-gradient(160deg, #FFFDE7, var(--yellow-light)); border-color: rgba(229,191,0,0.28); }
+    .scard.r { background: radial-gradient(ellipse 75% 60% at 50% 112%, rgba(204,0,0,0.20), rgba(204,0,0,0) 70%), linear-gradient(160deg, #FFF5F5, var(--red-light));   border-color: rgba(204,0,0,0.22); }
     .scard.b { background: linear-gradient(160deg, #F5F5F5, var(--black-light)); border-color: rgba(0,0,0,0.18); }
-    .scard.p { background: linear-gradient(160deg, #F9F0FF, var(--purple-light)); border-color: rgba(128,0,204,0.22); }
+    .scard.p { background: radial-gradient(ellipse 75% 60% at 50% 112%, rgba(128,0,204,0.20), rgba(128,0,204,0) 70%), linear-gradient(160deg, #F9F0FF, var(--purple-light)); border-color: rgba(128,0,204,0.22); }
     /* Top color bar */
     .scard::before {
       content:''; position:absolute;
@@ -347,19 +350,6 @@
     .scard.r::before { background: var(--red); }
     .scard.b::before { background: var(--black); }
     .scard.p::before { background: var(--purple); }
-
-    /* Soft glow at bottom */
-    .scard::after {
-      content:''; position:absolute;
-      bottom:-60px;left:50%;transform:translateX(-50%);
-      width:220px;height:220px;border-radius:50%;
-      filter:blur(55px);opacity:0.38;pointer-events:none;
-    }
-    .scard.g::after { background: var(--green); }
-    .scard.y::after { background: var(--yellow); }
-    .scard.r::after { background: var(--red); }
-    .scard.b::after { display: none; }
-    .scard.p::after { background: var(--purple); }
 
     /* ===== FEATURE CARD ===== */
     .feat {
