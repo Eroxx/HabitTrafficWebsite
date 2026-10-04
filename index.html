@@ -308,14 +308,19 @@
       position: fixed; inset: 0; background: rgba(0,0,0,0.45);
       z-index: 1000; opacity: 0; pointer-events: none;
       transition: opacity 0.25s ease;
+      display: flex; align-items: center; justify-content: center;
     }
     .screenshot-overlay.on { opacity: 1; pointer-events: auto; cursor: pointer; }
-    .screenshot-wrap.expanded .phone {
-      position: fixed; left: 50%; top: 50%;
-      transform: translate(-50%, -50%) scale(1.35);
-      z-index: 1001; cursor: pointer;
-      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    /* The enlarged phone is a COPY placed in the overlay. Enlarging the original in place never
+       worked: every phone sits inside a scroll-reveal row whose transform turns position:fixed
+       into "fixed to that row", and the hero phone's inline tilt overrode the centring
+       transform, so all ten landed off-screen (2026-10-04). */
+    .screenshot-overlay .phone.zoomed {
+      transform: scale(var(--z, 1.35)); transform-origin: center;
+      animation: zoomIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
     }
+    @keyframes zoomIn { from { transform: scale(calc(var(--z, 1.35) * 0.8)); opacity: 0.6; } }
+    @media (prefers-reduced-motion: reduce) { .screenshot-overlay .phone.zoomed { animation: none; } }
     .screenshot-wrap .phone { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
 
     /* ===== SIGNAL CARDS (light with color) ===== */
@@ -1083,7 +1088,7 @@
       <img src="brand_assets/Habbit AppIcon 1.png" alt="Habit Traffic" style="width:24px;height:24px;border-radius:6px;opacity:0.4;">
       <span style="font-size:13px;color:var(--faint);">© 2026 Chai Wellness</span>
     </div>
-    <div style="display:flex;align-items:center;gap:24px;">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px 24px;">
       <a href="https://discord.gg/UMyVU4ZVkx" target="_blank" rel="noopener"
          style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--faint);transition:color 0.2s;"
          onmouseover="this.style.color='#5865F2'" onmouseout="this.style.color='var(--faint)'">
@@ -1127,20 +1132,37 @@
     document.querySelectorAll('#hero .rv').forEach(el => el.classList.add('in'));
   }, 80);
 
-  // Screenshot: click to expand a bit (not full page)
+  // Screenshot: click to expand a bit (not full page). Shows a copy of the phone, centred in
+  // the overlay and capped to fit the window; see the CSS note on .phone.zoomed for why.
   const overlay = document.getElementById('screenshotOverlay');
   function closeScreenshot() {
-    document.querySelectorAll('.screenshot-wrap.expanded').forEach(w => w.classList.remove('expanded'));
-    if (overlay) overlay.classList.remove('on');
+    if (!overlay) return;
+    overlay.classList.remove('on');
+    overlay.innerHTML = '';
+  }
+  function openScreenshot(w) {
+    const ph = w.querySelector('.phone');
+    if (!overlay || !ph) return;
+    const nw = ph.offsetWidth, nh = ph.offsetHeight;   // layout size, ignoring tilt
+    const z = Math.min(1.35, (innerHeight * 0.9) / nh, (innerWidth * 0.9) / nw);
+    const copy = ph.cloneNode(true);
+    copy.removeAttribute('onmouseover'); copy.removeAttribute('onmouseout');
+    copy.style.transition = 'none';
+    copy.style.transform = '';
+    copy.style.width = nw + 'px';
+    copy.style.setProperty('--z', z);
+    copy.classList.add('zoomed');
+    overlay.innerHTML = '';
+    overlay.appendChild(copy);
+    copy.querySelectorAll('video').forEach(v => { v.muted = true; const p = v.play(); if (p) p.catch(() => {}); });
+    overlay.classList.add('on');
   }
   document.querySelectorAll('.screenshot-wrap').forEach(w => {
-    w.addEventListener('click', () => {
-      w.classList.toggle('expanded');
-      if (overlay) overlay.classList.toggle('on', !!document.querySelector('.screenshot-wrap.expanded'));
-    });
-    w.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); w.click(); } });
+    w.addEventListener('click', () => openScreenshot(w));
+    w.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openScreenshot(w); } });
   });
   if (overlay) overlay.addEventListener('click', closeScreenshot);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeScreenshot(); });
 
   // Videos with a light and a dark version (same pattern as Crate's site.js).
   (function () {
