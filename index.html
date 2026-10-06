@@ -251,6 +251,8 @@
     /* The hero video: same screen shape as the screenshots, its own clean 9:41 status bar, so no mask. */
     .phone-status-crop video { width: 100%; height: auto; display: block; }
     .phone-status-crop.is-video::before { display: none; }
+    /* Home and Lock Screen captures keep their own status bar and wallpaper; the grey mask would show. */
+    .phone-status-crop.no-mask::before { display: none; }
     /* Mask out OS status bar area on all screenshots */
     .phone-status-crop::before {
       content: '';
@@ -355,6 +357,8 @@
     .scard.r::before { background: var(--red); }
     .scard.b::before { background: var(--black); }
     .scard.p::before { background: var(--purple); }
+    /* The three lights sit in column wrappers; each card fills its row so they line up. */
+    .lights-grid > div > .scard { flex: 1; }
 
     /* ===== FEATURE CARD ===== */
     .feat {
@@ -581,14 +585,14 @@
       </div>
 
     </div>
-    <p class="rv d5" style="font-size:13px;color:var(--muted);line-height:1.6;max-width:420px;margin:28px auto 0;">Each colour says how much room a habit has left this period. Do a red or a yellow one and it turns purple: done.</p>
+    <p class="rv d5" style="font-size:13px;color:var(--muted);line-height:1.6;max-width:420px;margin:28px auto 0;">Each color says how much room a habit has left this period. Do a red or a yellow one and it turns purple: done.</p>
 
   </div>
 </section>
 
 
 <!-- ════════════════════ WHY HABIT TRAFFIC ════════════════════ -->
-<section class="section" style="background:linear-gradient(170deg,#FEF9EC 0%,#FAF0CE 60%,#F5E8B8 100%);">
+<section class="section" style="background:linear-gradient(180deg,var(--bg) 0,rgba(247,246,242,0) 220px),linear-gradient(170deg,#FEF9EC 0%,#FAF0CE 60%,#F5E8B8 100%);">
   <div class="section-inner">
 
     <div class="rv" style="text-align:center;margin-bottom:64px;">
@@ -658,7 +662,7 @@
 
 
 <!-- ════════════════════ THREE LIGHTS ════════════════════ -->
-<section class="section" style="background:linear-gradient(180deg,#F5E8B8 0%,var(--bg) 18%);">
+<section class="section" style="background:linear-gradient(180deg,#F5E8B8 0%,var(--bg) 18%);padding-bottom:32px;">
   <div class="section-inner">
 
     <div class="rv" style="text-align:center;margin-bottom:64px;">
@@ -709,7 +713,7 @@
       <div class="scard b rv" style="flex:1;">
         <div style="margin:0 auto 22px;width:fit-content;"><svg width="32" height="32" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#000000"/><path d="M12 12 L28 28 M28 12 L12 28" stroke="white" stroke-width="3.5" stroke-linecap="round"/></svg></div>
         <div class="f-head" style="font-size:22px;font-weight:800;color:var(--black);margin-bottom:8px;">Black</div>
-        <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:10px;">Period failed</div>
+        <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:10px;">Period missed</div>
         <p style="font-size:14px;color:var(--muted);line-height:1.65;">Your habit's time window closed before you hit your goal. A reset, not a failure — the rhythm still matters.</p>
       </div>
 
@@ -717,8 +721,8 @@
       <div class="scard p rv" style="flex:1;">
         <div style="margin:0 auto 22px;width:fit-content;"><svg width="32" height="32" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#8000CC"/><path d="M14 9 h12 v8 a6 6 0 0 1-12 0 Z" fill="white"/><path d="M14 11 Q10 11 10 15 Q10 18 14 18" stroke="white" stroke-width="2" fill="none"/><path d="M26 11 Q30 11 30 15 Q30 18 26 18" stroke="white" stroke-width="2" fill="none"/><rect x="18.5" y="23" width="3" height="5" fill="white"/><rect x="14" y="28" width="12" height="2.5" rx="1.25" fill="white"/></svg></div>
         <div class="f-head" style="font-size:22px;font-weight:800;color:var(--purple);margin-bottom:8px;">Complete</div>
-        <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:10px;">Goal exceeded</div>
-        <p style="font-size:14px;color:var(--muted);line-height:1.65;">You've surpassed your target for this period. No action needed — just enjoy the win and keep the streak alive.</p>
+        <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:10px;">Goal reached</div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.65;">You've hit your target for this period. No action needed — just enjoy the win and keep the streak alive.</p>
       </div>
 
     </div>
@@ -729,7 +733,7 @@
 
 
 <!-- ════════════════════ SCREENSHOTS ════════════════════ -->
-<section class="section" style="background:var(--bg);">
+<section class="section" style="background:var(--bg);padding-bottom:32px;">
   <div class="section-inner">
 
     <div class="rv" style="text-align:center;margin-bottom:64px;">
@@ -755,24 +759,24 @@
       <div class="rv d2">
         <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
           <div class="phone phone-screen">
-            <div class="phone-status-crop"><img src="brand_assets/iphone-todays-traffic.png" alt="Today's Traffic"></div>
+            <div class="phone-status-crop no-mask"><img src="brand_assets/iphone-widgets-home.png" alt="Home Screen with the Red Status widget listing Finish reports and Read 30 min, beside the Habits at a Glance widget"></div>
           </div>
         </div>
         <div style="text-align:center;margin-top:28px;padding:0 8px;">
-          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">Today's Traffic</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.55;">See all your habits and their live status at a glance. Tap the traffic light icon anytime to instantly filter down to any specific signal.</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">Widgets</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.55;">Your red habits on the Home Screen. Tap a circle to check one off without opening the app.</div>
         </div>
       </div>
 
       <div class="rv d3">
         <div class="screenshot-wrap" role="button" tabindex="0" style="cursor:pointer;display:inline-block;" title="Click to expand">
           <div class="phone phone-screen" style="transform:rotate(3deg) translateY(12px);">
-            <div class="phone-status-crop"><img src="brand_assets/iphone-sort-menu.png" alt="Smart Sorting"></div>
+            <div class="phone-status-crop no-mask"><img src="brand_assets/iphone-reminder-lock.png" alt="Lock Screen reminder: 4 habits need you today. Red: Read 30 min, Workout at Gym, Finish reports. Yellow: Journaling."></div>
           </div>
         </div>
         <div style="text-align:center;margin-top:28px;padding:0 8px;">
-          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">Smart Sorting</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.55;">Sort by status, name, repeating date, and more.</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;">Reminders</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.55;">Only on days a habit needs you, listing what's red and yellow. Done ones drop off.</div>
         </div>
       </div>
 
@@ -849,18 +853,18 @@
 
       <div class="feat rv d2">
         <div class="feat-icon" style="background:var(--green-mid);">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>
         </div>
-        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Daily Dashboard</div>
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;">See every habit sorted by category with live traffic-light status. Know what's due before you start your day.</p>
+        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Backups and Archive</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Restore your habits from a recent backup, or archive a habit you've finished with and keep all its history.</p>
       </div>
 
       <div class="feat rv d2">
         <div class="feat-icon" style="background:rgba(96,165,250,0.12);">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="1.8"/><path d="M5 8.5l7 1.5 7-1.5"/><path d="M12 10v5"/><path d="M8.5 21l3.5-6 3.5 6"/></svg>
         </div>
-        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Rich Statistics</div>
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Streaks, success rates, monthly performance charts, and a 90-day completion heatmap for every single habit.</p>
+        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Made for Everyone</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Works with VoiceOver, Larger Text, Reduce Motion and Dark Mode, and every status has its own shape as well as its color.</p>
       </div>
 
       <div class="feat rv d3">
@@ -875,8 +879,8 @@
         <div class="feat-icon" style="background:var(--yellow-mid);">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 6.6A9 9 0 1 1 5.6 6.6"/></svg>
         </div>
-        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">See only what you need to:</div>
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Set a cap on how many habits appear active each day. Focus on what matters most, and let the rest wait their turn.</p>
+        <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">See only what's left</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Hide what you've done today, what's already met its goal, or what can't be saved this period. The list shrinks to what still needs you.</p>
       </div>
 
       <div class="feat rv d5">
@@ -892,7 +896,7 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14B8A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         </div>
         <div class="f-head" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Smart Notifications</div>
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Daily color-coded summaries, per-habit reminders, or intelligent alerts that intensify as your deadline nears.</p>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Reminders only on days a habit needs you, and they stop the moment you do it. Pick a daily summary of what&rsquo;s red and yellow, one reminder per habit, or smart reminders that come closer together as the day runs out.</p>
       </div>
 
     </div>
@@ -941,7 +945,7 @@
             <img src="brand_assets/OtherApp icons/2.jpeg" alt="Shortcuts" style="width:64px;height:64px;border-radius:16px;display:block;object-fit:cover;">
           </div>
           <div class="f-head" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Shortcuts</div>
-          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Build automations that log habits and check your status using Apple Shortcuts. No manual tapping required.</p>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Use the Complete Habit action to check off a habit from an automation, or ask Siri to run your shortcut.</p>
         </div>
 
         <!-- iCloud Sync -->
@@ -987,7 +991,7 @@
             </div>
           </div>
           <div class="f-head" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Widgets</div>
-          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Put your red, yellow, or green habits on your Home Screen, and tap one to mark it done without opening the app.</p>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">Put your red, yellow, or green habits on your Home Screen, and tap one to mark it done without opening the app. iOS 18.2 or later.</p>
         </div>
 
       </div>
